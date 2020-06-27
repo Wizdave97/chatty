@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, loadCSSFromString} from '@airtable/blocks/ui';
+import { Button, loadCSSFromString} from '@airtable/blocks/ui';
 loadCSSFromString('#chatInput:focus {outline:none;backgroundColor:#ddd !important}');
 
 const ChatInput  = (props) => {

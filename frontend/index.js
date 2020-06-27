@@ -1,12 +1,17 @@
-import {initializeBlock, useGlobalConfig, useBase, Box, Text, useSession, loadCSSFromURLAsync} from '@airtable/blocks/ui';
+import {initializeBlock, useGlobalConfig, useBase, Box, Text, useSession, loadCSSFromURLAsync, useLoadable, useWatchable} from '@airtable/blocks/ui';
+import { cursor } from '@airtable/blocks';
 import ChatInput from './components/ChatInput';
 import Chat from './components/chat';
 import Tabs from './components/tabs';
 import ReplyModal from './components/chatReply';
+import Polls from './components/polls';
+import Sidebar from './components/sideBar';
 import React, {useState, useEffect } from 'react';
 loadCSSFromURLAsync('https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css');
+
 function ChattyBlock() {
     // YOUR CODE GOES HERE
+    useLoadable(cursor);
     const globalConfig = useGlobalConfig();
     const chatWindow = React.useRef(null);
     const { hasPermission } = globalConfig.checkPermissionsForSet();
@@ -17,8 +22,31 @@ function ChattyBlock() {
     const firstTableName = base.tables[0] ? base.tables[0].name : '';
     const [channel, setChannel] = useState(firstTableName);
     const [replying, setReplying] = useState(null);
+    const [isPollsOpen, setIsPollsOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const sidebarRef = React.useRef();
+
+    useWatchable(cursor, 'activeTableId', () => {
+        setChannel(base.getTableByIdIfExists(cursor.activeTableId).name);
+    })
+    useEffect(() => {
+       let tableId = base.getTableByName(channel).id;
+       if(tableId == cursor.activeTableId) return;
+       cursor ? cursor.setActiveTable(base.getTableByName(channel).id) : null; 
+    },[channel])
 
     useEffect(() => {
+        if(isSidebarOpen) {
+            sidebarRef.current.classList.add('w-64', 'p-2');
+        }
+        else {
+            sidebarRef.current.classList.remove('w-64', 'p-2');
+        }
+    },[isSidebarOpen])
+    useEffect(() => {
+        chatWindow ? chatWindow.current.scrollIntoView(true) : null;
+    }, [ ])
+    useWatchable(globalConfig, 'nextChatId', () => {
         chatWindow ? chatWindow.current.scrollIntoView(false) : null;
     })
     const sendChatToChannel = (message) => {
@@ -28,11 +56,12 @@ function ChattyBlock() {
             id: nextChatId,
             collaborator: session.currentUser,
             message,
-            timestamp: new Date().toLocaleString(),
+            timestamp: Date.now(),
             replies:[],
             likes:[],
             pinned:false,
-            channel
+            channel,
+            read:[]
         }
         if (hasPermission) {
             const chats = globalConfig.get('chats');
@@ -42,32 +71,7 @@ function ChattyBlock() {
             
         }
     }
-    const replyChat =(id)=> (message) => {
-        let nextChatId = globalConfig.get('nextChatId');
-        nextChatId = nextChatId ? nextChatId : 0;
-        const chat = {
-            id: nextChatId,
-            collaborator: session.currentUser,
-            message,
-            timestamp: new Date().toLocaleString(),
-            replies:[],
-            likes:[],
-            pinned:false,
-            channel
-        }
-        if(hasPermission) {
-            const chats = globalConfig.get('chats');
-            for(let item of chats){
-                if(id == item.id) {
-                    item.replies.push(chat);
-                    break;
-                }
-            }
-            globalConfig.setAsync('chats', chats);
-            globalConfig.setAsync('nextChatId', ++nextChatId);  
-            
-        }
-    }
+    
     const pinChat = (id) => () => {
         for(let chat of chats) {
             if(chat.id === id) {
@@ -91,9 +95,11 @@ function ChattyBlock() {
             justifyContent:'center',
             boxSizing:'border-box'
         }}>
-            {replying ? <ReplyModal chat={replying} pinChat={pinChat} setReplying={setReplying} replyChat={replyChat} /> : null}
+                <Sidebar sidebarRef={sidebarRef} isSidebarOpen={isSidebarOpen} setChannel={setChannel} channel={channel}  setIsSidebarOpen={setIsSidebarOpen}/>
+               {replying ?<ReplyModal  chat={replying} pinChat={pinChat} setReplying={setReplying}/>: null}
+               {isPollsOpen ? <Polls setIsPollsOpen={setIsPollsOpen} channel={channel}/> : null}
             <Box style={{boxSizing:'border-box',width: '100%', position:'relative', height:'100%'}}>
-                <Tabs channel={channel} setChannel={setChannel}/>
+                <Tabs channel={channel} setIsSidebarOpen={setIsSidebarOpen} setChannel={setChannel} setIsPollsOpen={setIsPollsOpen}/>
                 <div ref={chatWindow}
                 id="chatWindow"
                 style={{
@@ -118,8 +124,9 @@ function ChattyBlock() {
                         alignItems:"center"}} sendChat={sendChatToChannel} />
             </Box>
         </Box>
-        :<Text>Only creators and editors can chat on this medium</Text>
+        :<Text className="w-full font-bold text-center text-gray-700 text-xl">Only creators and editors can chat on this medium</Text>
     );
 }
+ 
 
 initializeBlock(() => <ChattyBlock />);

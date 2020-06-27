@@ -1,30 +1,25 @@
 import React from 'react';
-import { Button, useBase, Box} from '@airtable/blocks/ui';
+import { Button, Box, Text} from '@airtable/blocks/ui';
 
 const Tabs  = (props) => {
-    const { channel, setChannel } = props;
-    const base = useBase();
-    const tables = base.tables;
-    const tabsList = tables ? tables.map((table) => {
-        return (<Button className="text-indigo-600" style={channel === table.name ?{
-            fontWeight: 700,
-        }: {}}  key={table.id} marginLeft={1} onClick={()=> setChannel(table.name)}>{table.name}</Button>)
-    }):null
+    const {  channel, setIsPollsOpen, setIsSidebarOpen } = props;
+ 
+    
     return (
-        <Box  style={{
-             width:'100%',
-             display:"flex",
-             position: "fixed",
+        <Box className="w-full flex  flex-no-wrap top-0 items-center  justify-between w-full fixed bg-white border-b border-gray-400"  
+            style={{
              height:"2.5rem",
              paddingBottom:"4px",
-             backgroundColor:'white',
-             borderBottom: "1px solid rgba(0,0,0,0.5)",
-             flexWrap:"nowrap",
-             top:0,
-             alignItems:"center",
-             overflowX:"auto"}}
+             }}
              >
-              {tabsList}   
+                 <div className="flex  flex-no-wrap items-center ">
+                    <Button onClick={() => setIsSidebarOpen(true)} className="mx-1 fill-current text-indigo-600" aria-label="menu" icon="menu"/>
+                    <Text className="mx-1 text-sm text-indigo-600 font-semibold truncate">{channel}</Text>
+                 </div>
+                 <Box>
+                <Button className="mx-1 fill-current text-yellow-600" aria-label="Starred" icon="star"/>
+               <Button onClick={() => setIsPollsOpen(true)} className="mx-1 fill-current text-blue-600" aria-label="Polls" icon="chart"/>
+               </Box>
         </Box>
     )
 }

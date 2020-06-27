@@ -1,19 +1,24 @@
 import React from 'react';
-import { Box, Text, Button, colors} from '@airtable/blocks/ui';
+import { Box, Text, Button} from '@airtable/blocks/ui';
 
 const Chat = (props) => {
     const { collaborator, timestamp, message, replies, likes, pinned, id } = props.chat
     const {pinChat, setReplying, inreply } = props; 
+    let chatTimeStamp = new Date(timestamp).toLocaleString();
+    if ((new Date().getDay() - new Date(timestamp).getDay()) === 1) {
+        chatTimeStamp = `Yesterday ${new Date(timestamp).toLocaleTimeString()}`
+    }
+    else chatTimeStamp = `Today ${new Date(timestamp).toLocaleTimeString()}`
+
     return (
         <Box 
-        className={`hover:bg-blue-100 ${pinned ? 'bg-yellow-400' : ''}`}
+        className="hover:bg-blue-100  border-b border-gray-700 shadow-inner"
         style={{
             width:'100%',
             display:'flex',
             flexWrap:'wrap',
             padding:'0.25rem',
             boxSizing:'border-box',
-            borderBottom:'1px solid rgba(0,0,0,0.3)',
             marginTop:'0.5rem',
             cursor:'pointer'
         }}>
@@ -48,10 +53,10 @@ const Chat = (props) => {
                     marginLeft:'0.8rem',
                     width:'calc(100% - 32px)'
                     }}>
-                    <Box id="name" width="100%"><Text variant="default" style={{fontWeight:700}}>{collaborator ? collaborator.name : null}</Text></Box>
-                    <Box id="timestamp" width="100%"><Text variant="default">{timestamp}</Text></Box>
+                    <Box id="name" width="100%"><Text className="text-md font-semibold text-gray-700" variant="default">{collaborator ? collaborator.name : null}</Text></Box>
+                    <Box id="timestamp" width="100%"><Text className="text-sm text-gray-500" variant="default">{chatTimeStamp}</Text></Box>
                     <Box id="message">
-                    <Text variant="paragraph">{message}</Text>
+                    <Text className="text-sm text-gray-800" variant="paragraph">{message}</Text>
                     </Box>
                 </Box>
                 
@@ -81,6 +86,7 @@ const Chat = (props) => {
                size="small" 
                variant="secondary" 
                icon="star" 
+               className={`${pinned ? 'fill-current text-yellow-600' : ''}`}
                margin={1} 
                padding={1}
                aria-label="pinned" 

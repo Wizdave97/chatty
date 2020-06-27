@@ -1,30 +1,52 @@
-import React, {useRef, useEffect} from 'react';
-import { Box, Button} from '@airtable/blocks/ui';
+import React, {useRef} from 'react';
+import { Box, Button, useGlobalConfig, useSession, useWatchable, Dialog} from '@airtable/blocks/ui';
 import ChatInput from './ChatInput';
 import Chat from './chat';
 
 const ReplyModal = (props) => {
-    const { chat, replyChat, pinChat, setReplying } = props;
+    const { chat, pinChat, setReplying } = props;
     const chatWindow = useRef(null);
-    useEffect(() => {
+    const globalConfig = useGlobalConfig();
+    const session = useSession();
+    const { hasPermission } = globalConfig.checkPermissionsForSet();
+    
+    useWatchable(globalConfig, 'nextChatId', () => {
         chatWindow ? chatWindow.current.scrollIntoView(false) : null
     })
+
+    const replyChat =(id)=> (message) => {
+        let nextChatId = globalConfig.get('nextChatId');
+        nextChatId = nextChatId ? nextChatId : 0;
+        const newChat = {
+            id: nextChatId,
+            collaborator: session.currentUser,
+            message,
+            timestamp: Date.now(),
+            replies:[],
+            likes:[],
+            pinned:false,
+            channel: chat.channel,
+            read:[]
+        }
+        if(hasPermission) {
+            const chats = globalConfig.get('chats');
+            for(let item of chats){
+                if(id == item.id) {
+                    item.replies.push(newChat);
+                    break;
+                }
+            }
+            globalConfig.setAsync('chats', chats);
+            globalConfig.setAsync('nextChatId', ++nextChatId);  
+            
+        }
+    }
     return (
-        <div
-        className="rounded-md overflow-hidden" 
-        style={{
-            width:'95%',
-            height:'400px',
-            flexWrap:'wrap',
-            backgroundColor:'white',
-            position:'fixed', 
-            display:'flex', 
-            marginLeft:'auto',
-            marginRight:'auto', 
-            top:'5px',
-            boxShadow:'30px 30px 70px 0px rgba(0,0,0,0.75), -6px -6px 70px 0px rgba(0,0,0,0.75)',
-            zIndex:100}}>
-           <Box width="100%"
+        <Dialog className="w-full flex relative box-border p-0" height="400px"  onClose={() => setReplying(false)}> 
+            <Box  className="w-full absolute top-0 z-30 flex flex-no-wrap justify-end p-1 box-border">
+                <Button className="rounded-full opacity-50" aria-label="close modal" variant="danger" onClick={() => setReplying(null)} icon="x"/>
+            </Box>
+           <Box className="p-2 box-border" 
            style={{
                     width:'100%',
                     background:'transparent',
@@ -33,9 +55,7 @@ const ReplyModal = (props) => {
                     overflowY:'auto',
                     boxSizing:'border-box'
             }} >
-                <Box width="100%" style={{display:'flex', flexWrap:'nowrap', justifyContent:'end'}}>
-                    <Button aria-label="close modal" variant="danger" onClick={() => setReplying(null)} icon="x"/>
-                </Box>
+                
                 <Chat pinChat={pinChat} chat={chat} inreply={false}/>
                 <div 
                 ref={chatWindow}
@@ -56,7 +76,7 @@ const ReplyModal = (props) => {
                         bottom:0,
                         backgroundColor:'white',
                         alignItems:"center"}}  sendChat={replyChat(chat.id)} />
-        </div>
+        </Dialog>
     )
 }
 
