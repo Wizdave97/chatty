@@ -19,6 +19,7 @@ const ChatInput  = (props) => {
             }}
             onKeyDown = {e => {
                 if(e.key === 'Enter') {
+                     e.preventDefault();
                      sendChat(message) 
                      setMessage('')
                     }
