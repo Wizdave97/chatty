@@ -2,8 +2,8 @@ import React from 'react';
 import { Box, Text, Button} from '@airtable/blocks/ui';
 
 const Chat = (props) => {
-    const { collaborator, timestamp, message, replies, likes, pinned, id } = props.chat
-    const {pinChat, setReplying, inreply } = props; 
+    const { collaborator, timestamp, message, replies, pinned, id } = props.chat
+    const {pinChat, setReplying, inreply, newMessageRef } = props; 
     let chatTimeStamp = new Date(timestamp).toLocaleString();
     if ((new Date().getDay() - new Date(timestamp).getDay()) === 1) {
         chatTimeStamp = `Yesterday ${new Date(timestamp).toLocaleTimeString()}`
@@ -11,7 +11,8 @@ const Chat = (props) => {
     else chatTimeStamp = `Today ${new Date(timestamp).toLocaleTimeString()}`
 
     return (
-        <Box 
+        <div 
+        ref={newMessageRef}
         className="hover:bg-blue-100  border-b border-gray-700 shadow-inner"
         style={{
             width:'100%',
@@ -23,6 +24,7 @@ const Chat = (props) => {
             cursor:'pointer'
         }}>
             <div 
+            
             onClick = {() => setReplying ? setReplying(props.chat) : null}
             style={{
                 display:'flex',
@@ -66,13 +68,6 @@ const Chat = (props) => {
                 display:'flex',
                 flexWrap:'nowrap'
             }}>
-               <Button size="small" 
-               variant="secondary" 
-               icon="heart" 
-               margin={1} 
-               padding={1} 
-               aria-label="likes"
-               style={{borderRadius:'9999px'}}>{likes.length}</Button>
                <Button 
                onClick = {() => setReplying ? setReplying(props.chat) : null}
                size="small" 
@@ -94,7 +89,7 @@ const Chat = (props) => {
                onClick={pinChat(id)}>{pinned ? 'pinned' : null}</Button>
             </div>
             : null }
-        </Box>
+        </div>
     )
 }
 

@@ -17,7 +17,12 @@ const ChatInput  = (props) => {
                 resize: 'none',
                 height: '100%',
             }}
-            
+            onKeyDown = {e => {
+                if(e.key === 'Enter') {
+                     sendChat(message) 
+                     setMessage('')
+                    }
+                }}
             value={message} onChange={e => setMessage(e.target.value)} placeholder="Type a message" ></textarea>
             <Button
                 variant="primary"
@@ -27,7 +32,7 @@ const ChatInput  = (props) => {
                     alignSelf:'center', 
                 }}
                 padding={1}
-                onClick={() => sendChat(message)}
+                onClick={() => {sendChat(message);setMessage('')}}
                 icon="chevronRight"
                 aria-label="Send Message"
                 margin={1}

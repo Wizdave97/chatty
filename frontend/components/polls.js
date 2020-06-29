@@ -62,12 +62,35 @@ const Polls = (props) => {
            length: records.length,
            results,
            voters: [],
+           timestamp: Date.now(),
            expiresIn: expBigInt 
+        }
+        let nextChatId = globalConfig.get('nextChatId');
+        nextChatId = nextChatId ? nextChatId : 0;
+        const pollChat = {
+            type:'poll',
+            id: nextChatId,
+            pollId,
+            collaborator: session.currentUser,
+            channel,
+            question,
+            recordIds: records.map(record => record.id),
+            length: records.length,
+            results,
+            voters: [],
+            read: [session.currentUser.id],
+            timestamp: Date.now(),
+            expiresIn: expBigInt, 
+            pinned: false
         }
         const polls = globalConfig.get('polls') ? globalConfig.get('polls') : [];
         polls.push(poll);
         globalConfig.setAsync('polls', polls);
         globalConfig.setAsync('pollId',++pollId);
+        const chats = globalConfig.get('chats') ? globalConfig.get('chats') : [] ;
+        chats.push(pollChat)
+        globalConfig.setAsync('chats', chats);
+        globalConfig.setAsync('nextChatId', ++nextChatId);
         setIsDialogOpen(false);
     }
     

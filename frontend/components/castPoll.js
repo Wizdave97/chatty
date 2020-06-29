@@ -16,6 +16,7 @@ const CastPoll = (props) => {
     }
     const castVote = () => {
        const polls = globalConfig.get('polls');
+       const chats = globalConfig.get('chats');
        const pollCopy = {...poll};
        let totalVoters = pollCopy.voters.length + 1;
        if(pollCopy.voters.indexOf(session.currentUser.id) > -1) --totalVoters;
@@ -31,7 +32,15 @@ const CastPoll = (props) => {
                break;
            }
        }
+       for(let chat of chats) {
+           if(chat.pollId === pollCopy.id) {
+               chat.results = pollCopy.results;
+               chat.voters = pollCopy.voters;
+               break;
+           }
+       }
        globalConfig.setAsync('polls', polls);
+       globalConfig.setAsync('chats', chats);
        toggleCastPoll(null)();
     }
     return (
