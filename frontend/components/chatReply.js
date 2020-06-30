@@ -4,7 +4,7 @@ import ChatInput from './ChatInput';
 import Chat from './chat';
 
 const ReplyModal = (props) => {
-    const { chat, pinChat, setReplying } = props;
+    const { chat, pinChat, setReplying, isFullscreen } = props;
     const chatWindow = useRef(null);
     const globalConfig = useGlobalConfig();
     const session = useSession();
@@ -42,7 +42,7 @@ const ReplyModal = (props) => {
         }
     }
     return (
-        <Dialog className="w-full flex relative box-border p-0" height="400px"  onClose={() => setReplying(false)}> 
+        <Dialog className="relative box-border p-0" width={isFullscreen ? '500px' : '100%'} height="400px"  onClose={() => setReplying(false)}> 
             <Box  className="w-full absolute top-0 z-30 flex flex-no-wrap justify-end p-1 box-border">
                 <Button className="rounded-full opacity-50" aria-label="close modal" variant="danger" onClick={() => setReplying(null)} icon="x"/>
             </Box>
