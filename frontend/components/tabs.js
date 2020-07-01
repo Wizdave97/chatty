@@ -18,7 +18,7 @@ const Tabs = (props) => {
     }) : null
 
     return (
-        <Box className={`w-full flex z-10 flex-no-wrap top-0 items-center  justify-between w-full fixed bg-white border-b border-gray-400 ${isFullscreen ? 'tab-shift' : ''}`}
+        <Box className={`w-full flex z-10 flex-no-wrap fixed top-0 items-center  justify-between w-full  bg-white border-b border-gray-400 ${isFullscreen ? 'tab-shift' : ''}`}
             style={{
                 height: "2.5rem",
                 paddingBottom: "4px",

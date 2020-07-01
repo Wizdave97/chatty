@@ -19,8 +19,7 @@ const CastPoll = (props) => {
         const chats = globalConfig.get('chats');
         const pollCopy = { ...poll };
         let totalVoters = pollCopy.voters.length + 1;
-        if (pollCopy.voters.indexOf(session.currentUser.id) > -1) --totalVoters;
-        else pollCopy.voters.push(session.currentUser.id)
+        pollCopy.voters.push(session.currentUser.id)
         const { results } = pollCopy;
         pollCopy.recordIds.map(id => {
             let sum = results[id] + vote[id] ? vote[id] : 0;
@@ -62,6 +61,7 @@ const CastPoll = (props) => {
                         ))}
                     </ul>
                 </Box>
+                <Text className="w-full my-1 text-xs font-semibold text-gray-800">Remember, you can only poll once</Text>
                 <Button
                     onClick={castVote}
                     disabled={(poll && poll.recordIds.length) !== Object.values(vote).length}

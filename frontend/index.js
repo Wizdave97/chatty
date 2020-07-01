@@ -65,7 +65,6 @@ function ChattyBlock() {
             }, 500)
         }
         else {
-            console.log(scrollingPatch);
             scrollingPatch.current ? scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" }) : null
         }
         markAsRead(prevChannel);
@@ -110,7 +109,8 @@ function ChattyBlock() {
         }
         if (hasPermission) {
             const chats = globalConfig.get('chats');
-            chats.push(chat)
+            chats.length >= 500 ? chats.splice(0, 100) : null
+            chats.push(chat);
             globalConfig.setAsync('chats', chats);
             globalConfig.setAsync('nextChatId', ++nextChatId);
 
@@ -159,7 +159,7 @@ function ChattyBlock() {
                             {replying ? <ReplyModal isFullscreen={viewPort.isFullscreen} chat={replying} pinChat={pinChat} setReplying={setReplying} /> : null}
                             {isPollsOpen ? <Polls isFullscreen={viewPort.isFullscreen} setIsPollsOpen={setIsPollsOpen} channel={channel} /> : null}
                             {openPins ? <PinnedChats isFullscreen={viewPort.isFullscreen} setOpenPins={setOpenPins} pinChat={pinChat} toggleCastPoll={toggleCastPoll} /> : null}
-                            <Box style={{ boxSizing: 'border-box', width: '100%', position: 'relative', height: '100%' }}>
+                            <Box className="overflow-y-hidden" style={{ boxSizing: 'border-box', width: '100%', position: 'relative', height: '100%' }}>
                                 <Tabs isFullscreen={viewPort.isFullscreen} channel={channel} setOpenPins={setOpenPins} setIsSidebarOpen={setIsSidebarOpen} setChannel={setChannel} setIsPollsOpen={setIsPollsOpen} />
                                 <div
                                     style={{
@@ -172,7 +172,7 @@ function ChattyBlock() {
                                         boxSizing: 'border-box'
                                     }}>
                                     {displayedChats}
-                                    <div className="w-full h-8 bg-transparent invisible"></div>
+                                    <div className="w-full h-12 bg-transparent invisible"></div>
                                 </div>
                                 <div ref={scrollingPatch} className="w-full h-12 bg-transparent invisible"></div>
                                 <ChatInput

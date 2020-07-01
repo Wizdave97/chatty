@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Text, Button } from '@airtable/blocks/ui';
+import { Box, Text, Button, useSession } from '@airtable/blocks/ui';
 import PollRecord from './pollRecord';
 
 const PollChat = (props) => {
 
     const { pinChat, pollChat, toggleCastPoll, newMessageRef } = props;
     const poll = { ...pollChat }
+    const session = useSession();
     poll.id = poll.pollId;
     let chatTimeStamp = new Date(pollChat.timestamp).toLocaleString();
     if ((new Date().getDay() - new Date(pollChat.timestamp).getDay()) === 1) {
@@ -27,7 +28,7 @@ const PollChat = (props) => {
             }}>
             <div
                 ref={newMessageRef}
-                onClick={Date.now() < pollChat.expiresIn ? toggleCastPoll(poll) : () => (null)}
+                onClick={Date.now() < pollChat.expiresIn && pollChat.voters.indexOf(session.currentUser.id) <= -1 ? toggleCastPoll(poll) : () => (null)}
                 style={{
                     display: 'flex',
                     flexWrap: 'nowrap',
@@ -64,7 +65,7 @@ const PollChat = (props) => {
                         <span className={`absolute top-0 right-0 font-semibold lowercase text-xs ${Date.now() > pollChat.expiresIn ? ' text-red-700' : ' text-green-700'}`}>
                             {Date.now() > pollChat.expiresIn ? 'Expired' : 'Active'}
                         </span>
-                        <Text className="w-full mb-1 text-md font-bold text-gray-800">{pollChat.question}</Text>
+                        <Text className="w-full mb-1 text-md font-bold text-gray-800 mr-8">{pollChat.question}</Text>
                         <ul className="w-full list none flex flex-wrap">
                             {pollChat.recordIds.map(id => (
                                 <PollRecord key={id}
@@ -77,6 +78,8 @@ const PollChat = (props) => {
                                     result={pollChat.results[id]} />
                             ))}
                         </ul>
+                        <Text className="w-full my-1 text-md font-bold text-gray-800 mr-8">{`Number of voters: ${poll.voters.length}`}</Text>
+                        {poll.voters.indexOf(session.currentUser.id) >= 0 ? <Text className="w-full my-1 text-sm font-semibold text-gray-600 mr-8">You have already voted in this poll</Text> : null}
                     </Box>
                 </Box>
 
