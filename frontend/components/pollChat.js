@@ -51,11 +51,11 @@ const PollChat = (props) => {
                             height: '100%'
                         }} />
                 </Box>
-                <Box style={{
+                <Box className="pl-2" 
+                style={{
                     display: 'flex',
                     boxSizing: 'border-box',
                     flexWrap: 'wrap',
-                    marginLeft: '0.8rem',
                     width: 'calc(100% - 32px)'
                 }}>
                     <Box id="name" width="100%"><Text className="text-md font-semibold text-gray-700" variant="default">{pollChat.collaborator ? pollChat.collaborator.name : null}</Text></Box>

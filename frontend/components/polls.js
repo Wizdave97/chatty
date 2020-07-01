@@ -128,10 +128,12 @@ const Polls = (props) => {
             {isDialogOpen ?
                 <Dialog className="relative box-border p-0" width={isFullscreen ? '500px' : '100%'} height="400px" onClose={() => setIsDialogOpen(false)}>
                     <Dialog.CloseButton />
-                    <FormField className="w-full mb-2 p-2" label="Type in your poll question">
+                    <FormField className="w-full mb-2 p-2 box-border" label="Type in your poll question">
                         <Input value={question} onChange={e => setQuestion(e.target.value)} />
                     </FormField>
-                    <Text className="w-full text-md my-1">Select records to poll from view</Text>
+                    <div className="w-full mb-2 p-2 box-border">
+                    <Text className="w-full text-md">Select records to poll from view</Text>
+                    </div>
                     <ul className="w-full list none flex flex-wrap overflow-y-auto">
                         {records ? records.map(record => (<li className="w-full bg-gray-100 shadow-inner flex justify-between mb-1 text-md p-2" key={record.id}>
                             <RecordCard record={record} /></li>)) : null}
@@ -139,9 +141,12 @@ const Polls = (props) => {
                     <FormField className="w-full mb-2 p-2" label="Select poll expiry time">
                         <Input type="time" value={expiry} onChange={(event) => setExpiry(event.target.value)} />
                     </FormField>
+                    <div className="w-full mb-2 p-2 box-border">
                     <Button
+                        className=" my-2 box-border"
                         onClick={publishPoll}
                         disabled={(records.length <= 1 || expiry.split(':').length !== 2 || !question.trim()) ? true : false} variant="primary">Publish</Button>
+                    </div>
                 </Dialog>
                 : null
             }
