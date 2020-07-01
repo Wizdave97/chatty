@@ -6,17 +6,9 @@ const ChatInput = (props) => {
     const { sendChat, style, isFullscreen } = props;
     const [message, setMessage] = useState('');
     return (
-        <div className={`w-full ${isFullscreen ? 'tab-shift' : ''}`} style={{ ...style }}
+        <div className={`w-full justify-between ${isFullscreen ? 'tab-shift' : ''}`} style={{ ...style }}
         >
-            <textarea id="chatInput" style={{
-                border: "1px solid rgba(0,0,0,0.5)",
-                borderRadius: '4px',
-                flexGrow: 1,
-                padding: '15px',
-                background: '#f1f1f1',
-                resize: 'none',
-                height: '100%',
-            }}
+            <textarea id="chatInput" className="flex-grow h-full bg-gray-100 border border-gray-500 resize-none p-4 rounded-md" 
                 onKeyDown={e => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -27,17 +19,12 @@ const ChatInput = (props) => {
                 value={message} onChange={e => setMessage(e.target.value)} placeholder="Type a message" ></textarea>
             <Button
                 variant="primary"
-                style={{
-                    borderRadius: "9999px",
-                    border: "1px solid rgba(0,0,0,0.5)",
-                    alignSelf: 'center',
-                }}
                 padding={1}
                 onClick={() => { sendChat(message); setMessage('') }}
                 icon="chevronRight"
                 aria-label="Send Message"
                 margin={1}
-            />
+            >Send</Button>
         </div>
     )
 }

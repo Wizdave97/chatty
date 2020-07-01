@@ -13,14 +13,14 @@ const Sidebar = (props) => {
     const countUnreadMessages = (channel) => {
         let count = 0;
         const lastChatIndex = chats.length - 1;
-        for (let i = lastChatIndex; i >= 0; i--) {
+        for (let i = 0; i <= lastChatIndex; i++) {
             if (chats[i].read.indexOf(session.currentUser.id) <= -1 && chats[i].channel === channel) ++count
-            else break;
         }
         return count;
     }
+   
     const tabsList = tables ? tables.map((table) => {
-        const unread = countUnreadMessages(table);
+        const unread = countUnreadMessages(table.name);
         return (
             <ButtonWithBadge badge={unread} className={`w-full text-white bg-transparent ${channel === table.name ? 'text-indigo-600 font-bold bg-white' : ''}`}
                 key={table.id} marginLeft={1} onClick={() => {

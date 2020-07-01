@@ -2,8 +2,7 @@ import React from 'react';
 import { Button } from '@airtable/blocks/ui'
 
 const ButtonBadge = (props) => {
-    const buttonProps = { ...props };
-    delete buttonProps.badge;
+    
     return (
         <div className="relative p-0 m-0">
             {props.children ? <Button {...props}>{props.children}</Button> : <Button {...props} />}

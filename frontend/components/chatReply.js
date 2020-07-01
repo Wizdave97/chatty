@@ -10,8 +10,8 @@ const ReplyModal = (props) => {
     const session = useSession();
     const { hasPermission } = globalConfig.checkPermissionsForSet();
     
-    useWatchable(globalConfig, 'nextChatId', () => {
-        chatWindow ? chatWindow.current.scrollIntoView(false) : null
+    useWatchable(globalConfig, 'chats', () => {
+        chatWindow.current ? chatWindow.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" }) : null
     })
 
     const replyChat =(id)=> (message) => {
@@ -58,7 +58,7 @@ const ReplyModal = (props) => {
                 
                 <Chat pinChat={pinChat} chat={chat} inreply={false}/>
                 <div 
-                ref={chatWindow}
+                
                 style={{
                     width:'100%',
                     marginTop:'3px',
@@ -66,6 +66,7 @@ const ReplyModal = (props) => {
                 }}>
                     {chat.replies ? chat.replies.map(chat => (<Chat chat={chat} inreply={true} key={chat.id}/>)) : null}
                 </div>
+                <div ref={chatWindow} className="w-full h-24 bg-transparent invisible"></div>
            </Box>
            <ChatInput style={{
                         width:'100%',
@@ -75,7 +76,7 @@ const ReplyModal = (props) => {
                         flexWrap:"nowrap",
                         bottom:0,
                         backgroundColor:'white',
-                        alignItems:"center"}}  sendChat={replyChat(chat.id)} />
+                        alignItems:"end"}}  sendChat={replyChat(chat.id)} />
         </Dialog>
     )
 }

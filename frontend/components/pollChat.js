@@ -16,7 +16,7 @@ const PollChat = (props) => {
 
     return (
         <Box
-            className="hover:bg-blue-100  border-b border-gray-700 shadow-inner"
+            className="hover:bg-gray-300  border-0"
             style={{
                 width: '100%',
                 display: 'flex',
@@ -58,10 +58,10 @@ const PollChat = (props) => {
                     flexWrap: 'wrap',
                     width: 'calc(100% - 32px)'
                 }}>
-                    <Box id="name" width="100%"><Text className="text-md font-semibold text-gray-700" variant="default">{pollChat.collaborator ? pollChat.collaborator.name : null}</Text></Box>
-                    <Box id="timestamp" width="100%"><Text className="text-sm text-gray-500" variant="default">{chatTimeStamp}</Text></Box>
-                    <Box id="name" width="100%"><Text className="text-md font-semibold text-gray-800" variant="default">New Poll</Text></Box>
-                    <Box className="w-full relative flex flex-wrap mt-1 bg-gray-200 shadow-inner rounded-md p-1">
+                    <Box id="name" width="100%" className="mb-1"><Text className="text-md font-bold text-gray-800" variant="default">{pollChat.collaborator ? pollChat.collaborator.name : null}</Text></Box>
+                    <Box id="timestamp" width="100%" className="mb-1"><Text className="text-xs text-gray-600" variant="default">{chatTimeStamp}</Text></Box>
+                    <Box id="name" width="100%" className="mb-1"><Text className="text-xs font-semibold text-gray-700" variant="default">New Poll</Text></Box>
+                    <Box className="w-full relative flex flex-wrap mt-2 bg-gray-200 rounded-md p-1">
                         <span className={`absolute top-0 right-0 font-semibold lowercase text-xs ${Date.now() > pollChat.expiresIn ? ' text-red-700' : ' text-green-700'}`}>
                             {Date.now() > pollChat.expiresIn ? 'Expired' : 'Active'}
                         </span>

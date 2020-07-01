@@ -157,7 +157,7 @@ const Polls = (props) => {
                 </Box>
                 <Box className="w-full flex flex-wrap overflow-y-auto mt-2">
                     {polls && polls.length > 0 ? polls.map(poll => (
-                        <Box key={poll.id} onClick={Date.now() < poll.expiresIn && poll.voters.indexOf(session.currentUser.id) <= -1 ? toggleCastPoll(poll) : () => (null)} className="w-full relative flex flex-wrap mb-1 bg-gray-200 shadow-inner cursor-pointer rounded-md p-1">
+                        <Box key={poll.id} onClick={Date.now() < poll.expiresIn && poll.voters.indexOf(session.currentUser.id) <= -1 ? toggleCastPoll(poll) : () => (null)} className="w-full relative flex flex-wrap my-3 bg-gray-200 cursor-pointer rounded-md p-1">
                             <span className={`absolute top-0 right-0 font-semibold lowercase text-xs ${Date.now() > poll.expiresIn ? ' text-red-700' : ' text-green-700'}`}>
                                 {Date.now() > poll.expiresIn ? 'Expired' : 'Active'}
                             </span>

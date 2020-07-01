@@ -67,8 +67,8 @@ function ChattyBlock() {
         else {
             scrollingPatch.current ? scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" }) : null
         }
-        markAsRead(prevChannel);
-        return markAsRead(channel);
+       markAsRead(prevChannel);
+       return markAsRead(channel);
     }, [channel])
 
     useEffect(() => {
@@ -83,6 +83,10 @@ function ChattyBlock() {
     useWatchable(globalConfig, 'nextChatId', () => {
         if (newMessageRef.current) {
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" className="w-full mb-1 text-center text-green-800 text-sm">New Messages</span>');
+            setTimeout(() => {
+                document.getElementById('new-message').remove();
+            }, 500)
         }
         else {
             scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
@@ -93,6 +97,7 @@ function ChattyBlock() {
         setCastPollOpen(!isCastPollOpen);
     }
     const sendChatToChannel = (message) => {
+        if(!message.trim()) return;
         let nextChatId = globalConfig.get('nextChatId');
         nextChatId = nextChatId ? nextChatId : 0;
         const chat = {
@@ -165,26 +170,26 @@ function ChattyBlock() {
                                     style={{
                                         width: '100%',
                                         background: 'transparent',
-                                        height: 'calc(100% - 6.5rem)',
+                                        height: 'calc(100% - 7.5rem)',
                                         marginTop: '2.5rem',
-                                        marginBottom: '4rem',
+                                        marginBottom: '6rem',
                                         overflowY: 'auto',
                                         boxSizing: 'border-box'
                                     }}>
                                     {displayedChats}
-                                    <div className="w-full h-12 bg-transparent invisible"></div>
+                                    <div className="w-full h-10 bg-transparent invisible"></div>
                                 </div>
-                                <div ref={scrollingPatch} className="w-full h-12 bg-transparent invisible"></div>
+                                <div ref={scrollingPatch} className="w-full h-24 bg-transparent invisible"></div>
                                 <ChatInput
                                  isFullscreen={viewPort.isFullscreen}
                                  style={{
                                     display: "flex",
                                     position: "fixed",
-                                    height: "4rem",
-                                    flexWrap: "nowrap",
+                                    height: "5rem",
+                                    flexWrap: "wrap",
                                     bottom: 0,
                                     backgroundColor: 'white',
-                                    alignItems: "center"
+                                    alignItems: "end"
                                 }} sendChat={sendChatToChannel} />
                             </Box>
                             {isCastPollOpen ? <CastPoll isFullscreen={viewPort.isFullscreen} poll={clickedPoll} toggleCastPoll={toggleCastPoll} /> : null}
