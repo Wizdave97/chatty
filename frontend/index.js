@@ -83,7 +83,6 @@ function ChattyBlock() {
 
     useWatchable(globalConfig, 'nextChatId', () => {
         if (newMessageRef.current) {
-            console.log(newMessageRef.current);
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
             newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">New Messages</span>');
             setTimeout(() => {
@@ -112,7 +111,7 @@ function ChattyBlock() {
             likes: [],
             pinned: false,
             channel,
-            read: [/*session.currentUser.id*/]
+            read: [session.currentUser.id]
         }
         if (hasPermission) {
             currentChats.length >= 500 ? currentChats.splice(0, 100) : null
@@ -151,6 +150,7 @@ function ChattyBlock() {
     useEffect(() => {
         markAsRead(channel);
     })
+    
     return (
         <ErrorBoundary>
             {
