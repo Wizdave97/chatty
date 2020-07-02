@@ -14,6 +14,7 @@ import PinnedChats from './components/pinnedChats';
 loadCSSFromURLAsync('https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css');
 loadCSSFromString(".shift { width: calc(100% - 16rem); margin-left: 16rem} .tab-shift{ width: calc(100% - 16rem);}")
 
+let currentChats = [];
 function ChattyBlock() {
     // YOUR CODE GOES HERE
     useLoadable(cursor);
@@ -35,8 +36,8 @@ function ChattyBlock() {
     const [clickedPoll, setClickedPoll] = useState(null);
     const [openPins, setOpenPins] = useState(false);
     const sidebarRef = React.useRef(null);
-    const prevChannel = usePrevious(channel);
     const markAsRead = (channel) => {
+        const chats = globalConfig.get('chats');
         const chatsCopy = chats ? [...chats] : [];
         const lastChatIndex = chatsCopy.length - 1;
         for (let i = 0; i <= lastChatIndex; i++) {
@@ -44,7 +45,7 @@ function ChattyBlock() {
                 chatsCopy[i].read.push(session.currentUser.id);
             }
         }
-        gConfigStatic.setAsync('chats', chatsCopy);
+        currentChats = chatsCopy;
     }
     useEffect(() => {
         setChannel(firstTableName)
@@ -67,8 +68,8 @@ function ChattyBlock() {
         else {
             scrollingPatch.current ? scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" }) : null
         }
-       markAsRead(prevChannel);
-       return markAsRead(channel);
+       gConfigStatic.setAsync('chats', currentChats);
+       return () => (gConfigStatic.setAsync('chats', currentChats));
     }, [channel])
 
     useEffect(() => {
@@ -111,30 +112,32 @@ function ChattyBlock() {
             likes: [],
             pinned: false,
             channel,
-            read: [session.currentUser.id]
+            read: [/*session.currentUser.id*/]
         }
         if (hasPermission) {
-            const chats = globalConfig.get('chats');
-            chats.length >= 500 ? chats.splice(0, 100) : null
-            chats.push(chat);
-            globalConfig.setAsync('chats', chats);
+            currentChats.length >= 500 ? currentChats.splice(0, 100) : null
+            currentChats.push(chat);
+            globalConfig.setAsync('chats', currentChats);
             globalConfig.setAsync('nextChatId', ++nextChatId);
 
         }
     }
 
     const pinChat = (id) => () => {
-        for (let chat of chats) {
+        for (let chat of currentChats) {
             if (chat.id === id) {
                 chat.pinned = !chat.pinned;
-                globalConfig.setAsync('chats', chats);
+                globalConfig.setAsync('chats', currentChats);
                 break;
             }
         }
     }
 
     let ref = null;
-    const displayedChats = chats ? chats.filter(chat => (chat.channel === channel)).map((chat) => {
+    for(let i = currentChats.length; i < chats.length; i++) {
+        currentChats.push(chats[i]);
+    }
+    const displayedChats = currentChats ? currentChats.filter(chat => (chat.channel === channel)).map((chat) => {
         if (chat.read.indexOf(session.currentUser.id) <= -1 && !ref) {
             ref = newMessageRef;
         }
@@ -145,7 +148,9 @@ function ChattyBlock() {
                 return <PollChat newMessageRef={ref} key={chat.id} pinChat={pinChat} pollChat={chat} toggleCastPoll={toggleCastPoll} />
         }
     }) : null
-
+    useEffect(() => {
+        markAsRead(channel);
+    })
     return (
         <ErrorBoundary>
             {
@@ -178,9 +183,9 @@ function ChattyBlock() {
                                         boxSizing: 'border-box'
                                     }}>
                                     {displayedChats}
-                                    <div className="w-full h-4 bg-transparent invisible"></div>
+                                    {/* <div className="w-full h-4 bg-transparent invisible"></div> */}
                                 </div>
-                                <div ref={scrollingPatch} className="w-full h-20 bg-transparent invisible"></div>
+                                <div ref={scrollingPatch} className="w-full h-24 bg-transparent invisible"></div>
                                 <ChatInput
                                  isFullscreen={viewPort.isFullscreen}
                                  style={{
@@ -201,30 +206,6 @@ function ChattyBlock() {
         </ErrorBoundary>
     );
 }
-function usePrevious(value) {
 
-    // The ref object is a generic container whose current property is mutable ...
-
-    // ... and can hold any value, similar to an instance property on a class
-
-    const ref = React.useRef();
-
-
-
-    // Store current value in ref
-
-    useEffect(() => {
-
-        ref.current = value;
-
-    }, [value]); // Only re-run if value changes
-
-
-
-    // Return previous value (happens before update in useEffect above)
-
-    return ref.current;
-
-}
 
 initializeBlock(() => <ChattyBlock />);
