@@ -54,15 +54,15 @@ function ChattyBlock() {
         activeTable ? setChannel(activeTable.name) : null;
     })
     useEffect(() => {
-        let table = base.getTableByNameIfExists(channel);
-        if (table && table.id == cursor.activeTableId) return;
-        cursor ? table && cursor.setActiveTable(table.id) : null;
+        // let table = base.getTableByNameIfExists(channel);
+        // if (table && table.id == cursor.activeTableId) return;
+        // cursor ? table && cursor.setActiveTable(table.id) : null;
         if (newMessageRef.current) {
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" className="w-full mb-1 text-center text-green-800 text-sm">New Messages</span>');
+            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" class="w-full flex bg-gray-100 font-bold justify-center mb-1 text-center text-green-800 text-sm">New Messages</span>');
             setTimeout(() => {
                 document.getElementById('new-message').remove();
-            }, 500)
+            }, 3000)
         }
         else {
             scrollingPatch.current ? scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" }) : null
@@ -82,11 +82,12 @@ function ChattyBlock() {
 
     useWatchable(globalConfig, 'nextChatId', () => {
         if (newMessageRef.current) {
+            console.log(newMessageRef.current);
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" className="w-full mb-1 text-center text-green-800 text-sm">New Messages</span>');
+            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">New Messages</span>');
             setTimeout(() => {
                 document.getElementById('new-message').remove();
-            }, 500)
+            }, 3000)
         }
         else {
             scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
@@ -177,9 +178,9 @@ function ChattyBlock() {
                                         boxSizing: 'border-box'
                                     }}>
                                     {displayedChats}
-                                    <div className="w-full h-10 bg-transparent invisible"></div>
+                                    <div className="w-full h-4 bg-transparent invisible"></div>
                                 </div>
-                                <div ref={scrollingPatch} className="w-full h-24 bg-transparent invisible"></div>
+                                <div ref={scrollingPatch} className="w-full h-20 bg-transparent invisible"></div>
                                 <ChatInput
                                  isFullscreen={viewPort.isFullscreen}
                                  style={{
