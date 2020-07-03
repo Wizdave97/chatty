@@ -15,6 +15,7 @@ loadCSSFromURLAsync('https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css');
 loadCSSFromString(".shift { width: calc(100% - 16rem); margin-left: 16rem} .tab-shift{ width: calc(100% - 16rem);}")
 
 let currentChats = [];
+let ref = null;
 function ChattyBlock() {
     // YOUR CODE GOES HERE
     useLoadable(cursor);
@@ -37,8 +38,7 @@ function ChattyBlock() {
     const [openPins, setOpenPins] = useState(false);
     const sidebarRef = React.useRef(null);
     const markAsRead = (channel) => {
-        const chats = globalConfig.get('chats');
-        const chatsCopy = chats ? [...chats] : [];
+        const chatsCopy = currentChats ? JSON.parse(JSON.stringify(currentChats)) : [];
         const lastChatIndex = chatsCopy.length - 1;
         for (let i = 0; i <= lastChatIndex; i++) {
             if (chatsCopy[i].read.indexOf(session.currentUser.id) <= -1 && chatsCopy[i].channel === channel) {
@@ -46,6 +46,7 @@ function ChattyBlock() {
             }
         }
         currentChats = chatsCopy;
+        ref = null;
     }
     useEffect(() => {
         setChannel(firstTableName)
@@ -58,9 +59,10 @@ function ChattyBlock() {
         // let table = base.getTableByNameIfExists(channel);
         // if (table && table.id == cursor.activeTableId) return;
         // cursor ? table && cursor.setActiveTable(table.id) : null;
+        const unread = countUnreadMessages(channel);
         if (newMessageRef.current) {
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" class="w-full flex bg-gray-100 font-bold justify-center mb-1 text-center text-green-800 text-sm">New Messages</span>');
+            newMessageRef.current.insertAdjacentHTML('beforebegin', `<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">${unread} unread messages</span>`);
             setTimeout(() => {
                 document.getElementById('new-message').remove();
             }, 3000)
@@ -80,14 +82,23 @@ function ChattyBlock() {
             sidebarRef.current ? sidebarRef.current.classList.remove('w-64', 'p-2') : null;
         }
     }, [isSidebarOpen])
-
+    const countUnreadMessages = (channel) => {
+        let count = 0;
+        const lastChatIndex = chats.length - 1;
+        for (let i = 0; i <= lastChatIndex; i++) {
+            if (chats[i].read.indexOf(session.currentUser.id) <= -1 && chats[i].channel === channel) ++count
+        }
+        return count;
+    }
     useWatchable(globalConfig, 'nextChatId', () => {
+        //const unread = countUnreadMessages(channel)
         if (newMessageRef.current) {
-            newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-            newMessageRef.current.insertAdjacentHTML('beforebegin', '<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">New Messages</span>');
-            setTimeout(() => {
-                document.getElementById('new-message').remove();
-            }, 3000)
+            newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+            // newMessageRef.current.insertAdjacentHTML('beforebegin', 
+            // `<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">${unread} unread</span>`);
+            // setTimeout(() => {
+            //     document.getElementById('new-message') ? document.getElementById('new-message').remove() : null;
+            // }, 3000)
         }
         else {
             scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
@@ -111,7 +122,7 @@ function ChattyBlock() {
             likes: [],
             pinned: false,
             channel,
-            read: [session.currentUser.id]
+            read: [/*session.currentUser.id*/]
         }
         if (hasPermission) {
             currentChats.length >= 500 ? currentChats.splice(0, 100) : null
@@ -132,9 +143,10 @@ function ChattyBlock() {
         }
     }
 
-    let ref = null;
-    for(let i = currentChats.length; i < chats.length; i++) {
-        currentChats.push(chats[i]);
+    
+    const chatsClone = JSON.parse(JSON.stringify(chats))
+    for(let i = currentChats.length; i < chatsClone.length; i++) {
+        currentChats.push(chatsClone[i]);
     }
     const displayedChats = currentChats ? currentChats.filter(chat => (chat.channel === channel)).map((chat) => {
         if (chat.read.indexOf(session.currentUser.id) <= -1 && !ref) {
