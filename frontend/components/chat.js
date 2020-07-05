@@ -1,9 +1,10 @@
 import React from 'react';
 import { Box, Text, Button } from '@airtable/blocks/ui';
+import Reaction from './emoji';
 
 const Chat = (props) => {
-    const { collaborator, timestamp, message, replies, pinned, id } = props.chat
-    const { pinChat, setReplying, inreply, newMessageRef } = props;
+    const { collaborator, timestamp, message, replies, reactions, pinned, id } = props.chat
+    const { pinChat, setReplying, inreply, newMessageRef, toggleEmojiPicker, toggleReaction} = props;
     let chatTimeStamp = new Date(timestamp).toLocaleString();
     if ((new Date().getDay() - new Date(timestamp).getDay()) === 1) {
         chatTimeStamp = `Yesterday ${new Date(timestamp).toLocaleTimeString()}`
@@ -25,7 +26,7 @@ const Chat = (props) => {
             }}>
             <div
 
-                
+
                 style={{
                     display: 'flex',
                     flexWrap: 'nowrap',
@@ -34,11 +35,11 @@ const Chat = (props) => {
                     alignContent: 'start',
                     width: '100%'
                 }}>
-                <Box id="avatar" className="rounded-full shadow-md my-1"
+                <Box id="avatar" className="rounded-md shadow-md my-1"
                     style={{
                         overflow: 'hidden',
-                        width: '32px',
-                        height: '32px',
+                        width: '48px',
+                        height: '48px',
                     }}>
                     <img
                         src={collaborator ? collaborator.profilePicUrl : ''}
@@ -48,31 +49,35 @@ const Chat = (props) => {
                             height: '100%'
                         }} />
                 </Box>
-                <Box style={{
-                    display: 'flex',
-                    boxSizing: 'border-box',
-                    flexWrap: 'wrap',
-                    marginLeft: '0.8rem',
-                    width: 'calc(100% - 32px)'
-                }}>
-                    <Box id="name" width="100%" className="mb-1"><Text className="text-md font-bold text-gray-800" variant="default">{collaborator ? collaborator.name : null}</Text></Box>
-                    <Box id="timestamp" width="100%" className="mb-1"><Text className="text-xs text-gray-600" variant="default">{chatTimeStamp}</Text></Box>
-                    
+                <Box
+
+                    style={{
+                        display: 'flex',
+                        boxSizing: 'border-box',
+                        flexWrap: 'wrap',
+                        marginLeft: '0.8rem',
+                        width: 'calc(100% - 48px)'
+                    }}>
+                    <Box className="w-full flex flex-no-wrap mb-1">
+                        <Box id="name" className="mr-3"><Text className="text-md font-bold text-gray-800" variant="default">{collaborator ? collaborator.name : null}</Text></Box>
+                        <Box id="timestamp" className="mr-3"><Text className="text-xs text-gray-600" variant="default">{chatTimeStamp}</Text></Box>
+                    </Box>
+                    <Box id="message" className="w-full mb-2">
+                        <Text className="text-sm font-medium leading-relaxed text-gray-800" variant="paragraph">{message}</Text>
+                    </Box>
                 </Box>
             </div>
-            <Box id="message" className="w-full my-2">
-                        <Text className="text-sm font-medium leading-relaxed text-gray-800" variant="paragraph">{message}</Text>
-            </Box>
+
             {!inreply ?
-                <div id="icons" style={{
+                <div id="icons" className="mt-1" style={{
                     display: 'flex',
-                    flexWrap: 'nowrap'
+                    flexWrap: 'wrap'
                 }}>
                     {setReplying ? <Button
-                        onClick={(event) => { event.stopPropagation(); setReplying ? setReplying(props.chat) : null}}
+                        onClick={(event) => { event.stopPropagation(); setReplying ? setReplying(props.chat) : null }}
                         size="small"
                         variant="secondary"
-                        icon="team"
+                        icon="chat"
                         margin={1}
                         padding={1}
                         aria-label="replies"
@@ -86,7 +91,20 @@ const Chat = (props) => {
                         padding={1}
                         aria-label="pinned"
                         style={{ borderRadius: '9999px' }}
-                        onClick={(event) => {event.stopPropagation(); pinChat(id)()}}>{pinned ? 'pinned' : null}</Button>
+                        onClick={(event) => { event.stopPropagation(); pinChat(id)() }}>{pinned ? 'starred' : null}</Button>
+                    {Object.values(reactions).map(obj => {
+                        return obj.count > 0 ? <Reaction key={obj.id} emoji={obj} toggleReaction={toggleReaction} chatId={id}/> : null;
+                    })}
+                    <Button
+                        size="small"
+                        variant="secondary"
+                        icon="smiley"
+                        margin={1}
+                        padding={1}
+                        aria-label="pinned"
+                        style={{ borderRadius: '9999px' }}
+                        onClick={(event) => { event.stopPropagation(); toggleEmojiPicker(true, id)}}/>
+                    
                 </div>
                 : null}
         </div>

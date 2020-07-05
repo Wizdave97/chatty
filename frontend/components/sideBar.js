@@ -22,11 +22,11 @@ const Sidebar = (props) => {
     const tabsList = tables ? tables.map((table) => {
         const unread = countUnreadMessages(table.name);
         return (
-            <ButtonWithBadge badge={unread} className={`w-full text-white bg-transparent ${channel === table.name ? 'text-indigo-600 font-bold bg-white' : ''}`}
+            <ButtonWithBadge badge={unread} className={`w-full text-white font-semibold bg-transparent ${channel === table.name ? 'text-indigo-600 font-bold bg-gray-900' : ''}`}
                 key={table.id} marginLeft={1} onClick={() => {
                     setIsSidebarOpen(false);
                     setChannel(table.name)
-                }}>{table.name}</ButtonWithBadge>)
+                }}>{`#${table.name}`}</ButtonWithBadge>)
     }) : null
 
     return (

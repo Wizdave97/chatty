@@ -81,7 +81,8 @@ const Polls = (props) => {
             length: records.length,
             results,
             voters: [],
-            read: [session.currentUser.id],
+            read: [],
+            reactions:{},
             timestamp: Date.now(),
             expiresIn: expBigInt,
             pinned: false

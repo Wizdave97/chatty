@@ -1,10 +1,11 @@
 import React from 'react';
 import { Box, Text, Button, useSession } from '@airtable/blocks/ui';
 import PollRecord from './pollRecord';
+import Reaction from './emoji';
 
 const PollChat = (props) => {
 
-    const { pinChat, pollChat, toggleCastPoll, newMessageRef } = props;
+    const { pinChat, pollChat, toggleCastPoll, newMessageRef, toggleReaction, toggleEmojiPicker } = props;
     const poll = { ...pollChat }
     const session = useSession();
     poll.id = poll.pollId;
@@ -37,11 +38,11 @@ const PollChat = (props) => {
                     alignContent: 'start',
                     width: '100%'
                 }}>
-                <Box id="avatar" className="rounded-full shadow-md"
+                <Box id="avatar" className="rounded-md shadow-md"
                     style={{
                         overflow: 'hidden',
-                        width: '32px',
-                        height: '32px',
+                        width: '48px',
+                        height: '48px',
                     }}>
                     <img
                         src={pollChat.collaborator ? pollChat.collaborator.profilePicUrl : ''}
@@ -56,10 +57,12 @@ const PollChat = (props) => {
                     display: 'flex',
                     boxSizing: 'border-box',
                     flexWrap: 'wrap',
-                    width: 'calc(100% - 32px)'
+                    width: 'calc(100% - 48px)'
                 }}>
-                    <Box id="name" width="100%" className="mb-1"><Text className="text-md font-bold text-gray-800" variant="default">{pollChat.collaborator ? pollChat.collaborator.name : null}</Text></Box>
-                    <Box id="timestamp" width="100%" className="mb-1"><Text className="text-xs text-gray-600" variant="default">{chatTimeStamp}</Text></Box>
+                    <Box className="w-full flex flex-no-wrap mb-1">
+                        <Box id="name" className="mr-3"><Text className="text-md font-bold text-gray-800" variant="default">{pollChat.collaborator ? pollChat.collaborator.name : null}</Text></Box>
+                        <Box id="timestamp" className="mr-3"><Text className="text-xs text-gray-600" variant="default">{chatTimeStamp}</Text></Box>
+                    </Box>
                     <Box id="name" width="100%" className="mb-1"><Text className="text-xs font-semibold text-gray-700" variant="default">New Poll</Text></Box>
                     <Box className="w-full relative flex flex-wrap mt-2 bg-gray-200 rounded-md p-1">
                         <span className={`absolute top-0 right-0 font-semibold lowercase text-xs ${Date.now() > pollChat.expiresIn ? ' text-red-700' : ' text-green-700'}`}>
@@ -84,9 +87,9 @@ const PollChat = (props) => {
                 </Box>
 
             </div>
-            <div id="icons" style={{
+            <div id="icons" className="mt-1" style={{
                 display: 'flex',
-                flexWrap: 'nowrap'
+                flexWrap: 'wrap'
             }}>
 
                 <Button
@@ -98,7 +101,19 @@ const PollChat = (props) => {
                     padding={1}
                     aria-label="pinned"
                     style={{ borderRadius: '9999px' }}
-                    onClick={pinChat(pollChat.id)}>{pollChat.pinned ? 'pinned' : null}</Button>
+                    onClick={(event) => { event.stopPropagation(); pinChat(pollChat.id)() }}>{pollChat.pinned ? 'starred' : null}</Button>
+                     {Object.values(pollChat.reactions).map(obj => {
+                        return obj.count > 0 ? <Reaction key={obj.id} emoji={obj} toggleReaction={toggleReaction} chatId={pollChat.id}/> : null;
+                    })}
+                    <Button
+                        size="small"
+                        variant="secondary"
+                        icon="smiley"
+                        margin={1}
+                        padding={1}
+                        aria-label="pinned"
+                        style={{ borderRadius: '9999px' }}
+                        onClick={(event) => { event.stopPropagation(); toggleEmojiPicker(true, pollChat.id)}}/>
             </div>
         </Box>
     )

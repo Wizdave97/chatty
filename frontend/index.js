@@ -11,11 +11,12 @@ import React, { useState, useEffect } from 'react';
 import PollChat from './components/pollChat';
 import ErrorBoundary from './components/errorBoundary';
 import PinnedChats from './components/pinnedChats';
+import EmojiPicker from './components/emojiPicker';
 loadCSSFromURLAsync('https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css');
 loadCSSFromString(".shift { width: calc(100% - 16rem); margin-left: 16rem} .tab-shift{ width: calc(100% - 16rem);}")
 
-let currentChats = [];
-let ref = null;
+
+
 function ChattyBlock() {
     // YOUR CODE GOES HERE
     useLoadable(cursor);
@@ -36,17 +37,21 @@ function ChattyBlock() {
     const [isCastPollOpen, setCastPollOpen] = useState(false);
     const [clickedPoll, setClickedPoll] = useState(null);
     const [openPins, setOpenPins] = useState(false);
+    const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
+    const [selectedChatId, setSelectedChatId] = useState(null);
+    const toggleEmojiPicker = async (open, chatId) => {
+       await setSelectedChatId(chatId);
+       setOpenEmojiPicker(open);
+    }
     const sidebarRef = React.useRef(null);
     const markAsRead = (channel) => {
-        const chatsCopy = currentChats ? JSON.parse(JSON.stringify(currentChats)) : [];
+        const chatsCopy = chats ? chats : [];
         const lastChatIndex = chatsCopy.length - 1;
         for (let i = 0; i <= lastChatIndex; i++) {
             if (chatsCopy[i].read.indexOf(session.currentUser.id) <= -1 && chatsCopy[i].channel === channel) {
                 chatsCopy[i].read.push(session.currentUser.id);
             }
-        }
-        currentChats = chatsCopy;
-        ref = null;
+        } 
     }
     useEffect(() => {
         setChannel(firstTableName)
@@ -56,9 +61,9 @@ function ChattyBlock() {
         activeTable ? setChannel(activeTable.name) : null;
     })
     useEffect(() => {
-        // let table = base.getTableByNameIfExists(channel);
-        // if (table && table.id == cursor.activeTableId) return;
-        // cursor ? table && cursor.setActiveTable(table.id) : null;
+        let table = base.getTableByNameIfExists(channel);
+        if (table && table.id == cursor.activeTableId) return;
+        cursor ? table && cursor.setActiveTable(table.id) : null;
         const unread = countUnreadMessages(channel);
         if (newMessageRef.current) {
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
@@ -70,8 +75,8 @@ function ChattyBlock() {
         else {
             scrollingPatch.current ? scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" }) : null
         }
-       gConfigStatic.setAsync('chats', currentChats);
-       return () => (gConfigStatic.setAsync('chats', currentChats));
+       gConfigStatic.setAsync('chats', chats);
+       return () => (gConfigStatic.setAsync('chats', chats));
     }, [channel])
 
     useEffect(() => {
@@ -91,18 +96,19 @@ function ChattyBlock() {
         return count;
     }
     useWatchable(globalConfig, 'nextChatId', () => {
-        //const unread = countUnreadMessages(channel)
-        if (newMessageRef.current) {
-            newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-            // newMessageRef.current.insertAdjacentHTML('beforebegin', 
-            // `<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">${unread} unread</span>`);
-            // setTimeout(() => {
-            //     document.getElementById('new-message') ? document.getElementById('new-message').remove() : null;
-            // }, 3000)
-        }
-        else {
-            scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
-        }
+        const unread = countUnreadMessages(channel)
+            if (newMessageRef.current) {
+                newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+                // newMessageRef.current.insertAdjacentHTML('beforebegin', 
+                // `<span id="new-message" class="w-full bg-gray-100 flex mb-1 text-center justify-center text-green-800 font-bold text-sm">${unread} unread</span>`);
+                // setTimeout(() => {
+                //     document.getElementById('new-message') ? document.getElementById('new-message').remove() : null;
+                // }, 3000)
+            }
+            else {
+                if(unread > 0) scrollingPatch.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+            }
+         
     })
     const toggleCastPoll = (poll) => async () => {
         await setClickedPoll(poll);
@@ -122,41 +128,63 @@ function ChattyBlock() {
             likes: [],
             pinned: false,
             channel,
-            read: [/*session.currentUser.id*/]
+            reactions:{},
+            read: []
         }
         if (hasPermission) {
-            currentChats.length >= 500 ? currentChats.splice(0, 100) : null
-            currentChats.push(chat);
-            globalConfig.setAsync('chats', currentChats);
+            chats.length >= 500 ? chats.splice(0, 100) : null
+            chats.push(chat);
+            globalConfig.setAsync('chats', chats);
             globalConfig.setAsync('nextChatId', ++nextChatId);
 
         }
     }
 
     const pinChat = (id) => () => {
-        for (let chat of currentChats) {
+        for (let chat of chats) {
             if (chat.id === id) {
                 chat.pinned = !chat.pinned;
-                globalConfig.setAsync('chats', currentChats);
+                globalConfig.setAsync('chats', chats);
                 break;
             }
         }
     }
-
     
-    const chatsClone = JSON.parse(JSON.stringify(chats))
-    for(let i = currentChats.length; i < chatsClone.length; i++) {
-        currentChats.push(chatsClone[i]);
+    const toggleReaction = (chatId, emoji) => {
+        for (let chat of chats) {
+            if (chat.id === chatId) {
+                if (chat.reactions[emoji.id]) {
+                    if(chat.reactions[emoji.id].collaborators.indexOf(session.currentUser.id) <= -1) {
+                        chat.reactions[emoji.id].count++
+                        chat.reactions[emoji.id].collaborators.push(session.currentUser.id);
+                    }
+                    else {
+                        chat.reactions[emoji.id].count--;
+                        chat.reactions[emoji.id].collaborators.splice(chat.reactions[emoji.id].collaborators.indexOf(session.currentUser.id), 1)
+                    }  
+                }
+                else {
+                    chat.reactions[emoji.id]  = emoji;
+                    chat.reactions[emoji.id].count = 1;
+                    chat.reactions[emoji.id].collaborators = [session.currentUser.id];
+                }
+                globalConfig.setAsync('chats', chats);
+                break;
+            }
+        }
     }
-    const displayedChats = currentChats ? currentChats.filter(chat => (chat.channel === channel)).map((chat) => {
+    
+    
+    let ref = null;
+    const displayedChats = chats ? chats.filter(chat => (chat.channel === channel)).map((chat) => {
         if (chat.read.indexOf(session.currentUser.id) <= -1 && !ref) {
             ref = newMessageRef;
         }
         switch (chat.type) {
             case 'msg':
-                return <Chat newMessageRef={ref} inreply={false} setReplying={setReplying} chat={chat} pinChat={pinChat} key={chat.id} />
+                return <Chat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} newMessageRef={ref} inreply={false} setReplying={setReplying} chat={chat} pinChat={pinChat} key={chat.id} />
             case 'poll':
-                return <PollChat newMessageRef={ref} key={chat.id} pinChat={pinChat} pollChat={chat} toggleCastPoll={toggleCastPoll} />
+                return <PollChat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} newMessageRef={ref} key={chat.id} pinChat={pinChat} pollChat={chat} toggleCastPoll={toggleCastPoll} />
         }
     }) : null
     useEffect(() => {
@@ -179,7 +207,7 @@ function ChattyBlock() {
                                 boxSizing: 'border-box'
                             }}>
 
-                            {replying ? <ReplyModal isFullscreen={viewPort.isFullscreen} chat={replying} pinChat={pinChat} setReplying={setReplying} /> : null}
+                            {replying ? <ReplyModal  isFullscreen={viewPort.isFullscreen} chat={replying} pinChat={pinChat} setReplying={setReplying} /> : null}
                             {isPollsOpen ? <Polls isFullscreen={viewPort.isFullscreen} setIsPollsOpen={setIsPollsOpen} channel={channel} /> : null}
                             {openPins ? <PinnedChats isFullscreen={viewPort.isFullscreen} setOpenPins={setOpenPins} pinChat={pinChat} toggleCastPoll={toggleCastPoll} /> : null}
                             <Box className="overflow-y-hidden" style={{ boxSizing: 'border-box', width: '100%', position: 'relative', height: '100%' }}>
@@ -197,7 +225,7 @@ function ChattyBlock() {
                                     {displayedChats}
                                     {/* <div className="w-full h-4 bg-transparent invisible"></div> */}
                                 </div>
-                                <div ref={scrollingPatch} className="w-full h-24 bg-transparent invisible"></div>
+                                <div ref={scrollingPatch} className="w-full h-12 bg-transparent invisible"></div>
                                 <ChatInput
                                  isFullscreen={viewPort.isFullscreen}
                                  style={{
@@ -210,6 +238,7 @@ function ChattyBlock() {
                                     alignItems: "end"
                                 }} sendChat={sendChatToChannel} />
                             </Box>
+                            {openEmojiPicker ? <EmojiPicker chatId={selectedChatId} toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker}/> : null}
                             {isCastPollOpen ? <CastPoll isFullscreen={viewPort.isFullscreen} poll={clickedPoll} toggleCastPoll={toggleCastPoll} /> : null}
                         </Box>
                     </React.Fragment>

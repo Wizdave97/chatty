@@ -6,7 +6,7 @@ const ChatInput = (props) => {
     const { sendChat, style, isFullscreen } = props;
     const [message, setMessage] = useState('');
     return (
-        <div className={`w-full justify-between ${isFullscreen ? 'tab-shift' : ''}`} style={{ ...style }}
+        <div className={`w-full bg-gray-100 justify-between ${isFullscreen ? 'tab-shift' : ''}`} style={{ ...style }}
         >
             <textarea id="chatInput" className="flex-grow h-full bg-gray-100 border border-gray-500 resize-none p-4 rounded-md" 
                 onKeyDown={e => {
