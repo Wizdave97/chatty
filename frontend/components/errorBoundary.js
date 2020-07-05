@@ -16,7 +16,7 @@ class ErrorBoundary extends React.Component {
     render() {
       if (this.state.hasError) {      
           // You can render any custom fallback UI      
-          return <h1 className="w-full text-center text-gray-700 font-semibold text-lg">A new table is being added to the base, the block will resume shortly</h1>;   
+          return <h1 className="w-full text-center text-gray-700 font-semibold text-lg">An error occured, the block will try resume shortly, if not contact the developer</h1>;   
          }
       return this.props.children; 
     }

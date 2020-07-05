@@ -61,9 +61,9 @@ function ChattyBlock() {
         activeTable ? setChannel(activeTable.name) : null;
     })
     useEffect(() => {
-        let table = base.getTableByNameIfExists(channel);
-        if (table && table.id == cursor.activeTableId) return;
-        cursor ? table && cursor.setActiveTable(table.id) : null;
+        // let table = base.getTableByNameIfExists(channel);
+        // if (table && table.id == cursor.activeTableId) return;
+        // cursor ? table && cursor.setActiveTable(table.id) : null;
         const unread = countUnreadMessages(channel);
         if (newMessageRef.current) {
             newMessageRef.current.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
