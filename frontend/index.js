@@ -175,17 +175,23 @@ function ChattyBlock() {
     }
     
     
-    let ref = null;
+   
+    let count = 0;
     const displayedChats = chats ? chats.filter(chat => (chat.channel === channel)).map((chat) => {
-        if (chat.read.indexOf(session.currentUser.id) <= -1 && !ref) {
-            ref = newMessageRef;
+        if ((chat.read.indexOf(session.currentUser.id) < 0) && (count < 1)) {
+            count++;
         }
+        let node;
         switch (chat.type) {
             case 'msg':
-                return <Chat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} newMessageRef={ref} inreply={false} setReplying={setReplying} chat={chat} pinChat={pinChat} key={chat.id} />
+                node = <Chat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} reference={count == 1 ? newMessageRef : null} inreply={false} setReplying={setReplying} chat={chat} pinChat={pinChat} key={chat.id} />
+                break;
             case 'poll':
-                return <PollChat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} newMessageRef={ref} key={chat.id} pinChat={pinChat} pollChat={chat} toggleCastPoll={toggleCastPoll} />
+                node = <PollChat toggleReaction={toggleReaction} toggleEmojiPicker={toggleEmojiPicker} reference={count == 1 ? newMessageRef : null} key={chat.id} pinChat={pinChat} pollChat={chat} toggleCastPoll={toggleCastPoll} />
+                break;
         }
+        if(chat.read.indexOf(session.currentUser.id) < 0) count++
+        return node;
     }) : null
     useEffect(() => {
         markAsRead(channel);

@@ -4,7 +4,7 @@ import Reaction from './emoji';
 
 const Chat = (props) => {
     const { collaborator, timestamp, message, replies, reactions, pinned, id } = props.chat
-    const { pinChat, setReplying, inreply, newMessageRef, toggleEmojiPicker, toggleReaction} = props;
+    const { pinChat, setReplying, inreply, reference, toggleEmojiPicker, toggleReaction} = props;
     let chatTimeStamp = new Date(timestamp).toLocaleString();
     if ((new Date().getDay() - new Date(timestamp).getDay()) === 1) {
         chatTimeStamp = `Yesterday ${new Date(timestamp).toLocaleTimeString()}`
@@ -14,7 +14,7 @@ const Chat = (props) => {
     return (
         <div
             onClick={() => setReplying ? setReplying(props.chat) : null}
-            ref={newMessageRef}
+            ref={reference}
             className="hover:bg-gray-300 border-0 my-6"
             style={{
                 width: '100%',
